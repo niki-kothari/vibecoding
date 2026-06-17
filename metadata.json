@@ -1,0 +1,6 @@
+{
+  "name": "SareeSense AI",
+  "description": "B2B AI lookbook and catalog designer for Surat and Indian wholesale saree textile markets. Scan swatches to instantly generate model-worn digital catalogs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
