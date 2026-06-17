@@ -1,0 +1,147 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny gate
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn();
+    }
+
+    // Prevents injection of junk IDs
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Rigid schema checking
+    function isValidTask(data) {
+      return data.keys().hasAll(['text', 'completed', 'priority', 'category', 'createdAt', 'userId'])
+        && data.keys().size() == (6
+          + ('dueDate' in data ? 1 : 0)
+          + ('userName' in data ? 1 : 0)
+          + ('userEmail' in data ? 1 : 0)
+          + ('notes' in data ? 1 : 0)
+          + ('completedAt' in data ? 1 : 0))
+        && data.text is string
+        && data.text.size() > 0
+        && data.text.size() <= 1000
+        && data.completed is bool
+        && data.priority is string
+        && (data.priority == 'low' || data.priority == 'medium' || data.priority == 'high')
+        && data.category is string
+        && data.category.size() <= 100
+        && data.createdAt is string
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && (!('dueDate' in data) || (data.dueDate is string && data.dueDate.size() <= 30))
+        && (!('userName' in data) || (data.userName is string && data.userName.size() <= 150))
+        && (!('userEmail' in data) || (data.userEmail is string && data.userEmail.size() <= 150))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 3000))
+        && (!('completedAt' in data) || (data.completedAt is string && data.completedAt.size() <= 50));
+    }
+
+    // Rigid schema checking for Schedule
+    function isValidSchedule(data) {
+      return data.keys().hasAll(['date', 'userId', 'slots', 'updatedAt'])
+        && data.keys().size() == 4
+        && data.date is string
+        && data.date.size() <= 30
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.slots is map
+        && data.updatedAt is string;
+    }
+
+    // Rigid schema checking for Hydration
+    function isValidHydration(data) {
+      return data.keys().hasAll(['date', 'userId', 'count', 'target', 'updatedAt'])
+        && data.keys().size() == 5
+        && data.date is string
+        && data.date.size() <= 30
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.count is int
+        && data.target is int
+        && data.updatedAt is string;
+    }
+
+    match /tasks/{taskId} {
+      // 1. Secured get
+      allow get: if isSignedIn();
+      
+      // 2. Secured list - read all tasks from any user
+      allow list: if isSignedIn();
+      
+      // 3. Document create
+      allow create: if isEmailVerified() && isValidId(taskId) && isValidTask(incoming());
+      
+      // 4. Action-based updates
+      allow update: if isEmailVerified() && isValidId(taskId) && isValidTask(incoming()) && (
+        incoming().userId == resource.data.userId &&
+        incoming().createdAt == resource.data.createdAt && (
+          // Action 1: Toggle completed
+          (incoming().diff(resource.data).affectedKeys().hasOnly(['completed', 'completedAt'])) ||
+          // Action 2: Edit task fields
+          (incoming().diff(resource.data).affectedKeys().hasOnly(['text', 'priority', 'category', 'dueDate', 'userName', 'userEmail', 'notes']))
+        )
+      );
+
+      // 5. Document delete
+      allow delete: if isEmailVerified() && isValidId(taskId) && resource.data.userId == request.auth.uid;
+    }
+
+    match /schedules/{dateId} {
+      // 1. Secured get
+      allow get: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+      
+      // 2. Secured list
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // 3. Document create
+      allow create: if isEmailVerified() && isValidId(dateId) && isValidSchedule(incoming());
+      
+      // 4. Update
+      allow update: if isEmailVerified() && isValidId(dateId) && isValidSchedule(incoming()) && (
+        incoming().userId == resource.data.userId &&
+        incoming().date == resource.data.date
+      );
+
+      // 5. Document delete
+      allow delete: if isEmailVerified() && isValidId(dateId) && resource.data.userId == request.auth.uid;
+    }
+
+    match /hydrations/{dateId} {
+      // 1. Secured get
+      allow get: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+      
+      // 2. Secured list
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // 3. Document create
+      allow create: if isEmailVerified() && isValidId(dateId) && isValidHydration(incoming());
+      
+      // 4. Update
+      allow update: if isEmailVerified() && isValidId(dateId) && isValidHydration(incoming()) && (
+        incoming().userId == resource.data.userId &&
+        incoming().date == resource.data.date
+      );
+
+      // 5. Document delete
+      allow delete: if isEmailVerified() && isValidId(dateId) && resource.data.userId == request.auth.uid;
+    }
+  }
+}

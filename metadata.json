@@ -1,6 +1,6 @@
 {
-  "name": "SareeSense AI",
-  "description": "B2B AI lookbook and catalog designer for Surat and Indian wholesale saree textile markets. Scan swatches to instantly generate model-worn digital catalogs.",
+  "name": "Todo List",
+  "description": "An elegant botanical planner, daily task organizer, and automation console featuring a workspace focus dashboard, doodles sketch pad, Google Sheets sync, and automated Gmail reminders.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

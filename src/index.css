@@ -1,1 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Architects+Daughter&family=Caveat:wght@500;700&family=Inter:wght@300;400;500;600;700&family=Patrick+Hand&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Patrick Hand", "Caveat", cursive;
+  --font-architect: "Architects Daughter", cursive;
+  --font-amatic: "Amatic SC", sans-serif;
+}
+
+/* Custom scrollbars that look subtle and clean */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Elegant styled scrollbars for task lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #eddcc9;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #dbcaa9;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #eddcc9 transparent;
+}
+
+/* Simple paper dotted grid effect */
+.bg-dots {
+  background-image: radial-gradient(#d3cfc9 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Handdrawn border wavy/wiggly styled overlays */
+.hand-container {
+  position: relative;
+  border-radius: 18px;
+}
+
+/* Water glasses shine wave keyframes */
+@keyframes wave {
+  0% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-2px) scaleY(1.05); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+.animate-water {
+  animation: wave 3s ease-in-out infinite;
+}
+

@@ -1,0 +1,123 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A daily planner planner task item",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Task content text"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Completion status"
+        },
+        "priority": {
+          "type": "string",
+          "description": "Task priority level (low, medium, high)",
+          "enum": ["low", "medium", "high"]
+        },
+        "category": {
+          "type": "string",
+          "description": "Category name"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Optional due date in YYYY-MM-DD format"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp or server timestamp when created"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner user ID matching request.auth.uid"
+        },
+        "userName": {
+          "type": "string",
+          "description": "Name of the user assigning or carrying out the task"
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Email address of the user"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes or necessary important details"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "ISO timestamp indicating when the task was completed"
+        }
+      },
+      "required": ["text", "completed", "priority", "category", "createdAt", "userId"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "An hourly tracker schedule document for a specific date",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Date of the schedule in YYYY-MM-DD format"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner user ID matching request.auth.uid"
+        },
+        "slots": {
+          "type": "object",
+          "description": "Map of hour strings to task values"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the schedule was updated"
+        }
+      },
+      "required": ["date", "userId", "slots", "updatedAt"]
+    },
+    "Hydration": {
+      "title": "Hydration",
+      "description": "A daily hydration tracker document",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Date of the tracker in YYYY-MM-DD format"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner user ID matching request.auth.uid"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Number of glasses of water drunk"
+        },
+        "target": {
+          "type": "integer",
+          "description": "Target glasses of water, typically 10"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the tracker was updated"
+        }
+      },
+      "required": ["date", "userId", "count", "target", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Collection of tasks stored per user"
+    },
+    "schedules/{date}": {
+      "schema": "Schedule",
+      "description": "Collection of schedules for each date"
+    },
+    "hydrations/{date}": {
+      "schema": "Hydration",
+      "description": "Collection of water hydration counts for each date"
+    }
+  }
+}
